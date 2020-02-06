@@ -131,14 +131,10 @@ def isPresent (lst, element, comparefunction):
     """
     size = lst['size']
     if size > 0:
-        keyexist = False
         for keypos in range (1,size+1):
             if (comparefunction (element, lst['elements'][keypos-1])):
-                keyexist = True
-                break
-        if keyexist:
-            return keypos
-    return 0   
+                return keypos
+    return 0
 
 
 def changeInfo (lst, pos, newinfo):

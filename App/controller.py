@@ -25,6 +25,8 @@ import csv
 from ADT import list as lt
 from DataStructures import listiterator as it
 from Sorting import mergesort as sort
+from time import process_time 
+
 
 """
 El controlador se encarga de mediar entre la vista y el modelo.
@@ -49,14 +51,14 @@ def printList (lst):
 
 
 def compareauthors (authorname1, author):
-    return  (authorname1 == author['name'] )
+    return  (authorname1.lower() in author['name'].lower())
 
 
 def compareratings (book1, book2):
     return ( float(book1['average_rating']) > float(book2['average_rating']))
 
 
-def compareids (id, tag):
+def comparetagids (id, tag):
     return (id  == tag['tag_id'])
 
 
@@ -70,10 +72,7 @@ def comparetagnames (name, tag):
     return (name  == tag['name'])
 
 
-
 # Funciones para la carga de datos 
-
-
 
 def loadBooks (catalog):
     """
@@ -81,7 +80,8 @@ def loadBooks (catalog):
     cada uno de ellos, se crea en la lista de autores, a dicho autor y una
     referencia al libro que se esta procesando.
     """
-    booksfile = cf.data_dir + 'GoodReads/books-small.csv'
+    t1_start = process_time() #tiempo inicial
+    booksfile = cf.data_dir + 'GoodReads/books.csv'
     input_file = csv.DictReader(open(booksfile))
     for book in input_file:  
         # Se adiciona el libro a la lista de libros
@@ -92,18 +92,23 @@ def loadBooks (catalog):
         # crea un libro en la lista de dicho autor (apuntador al libro)
         for author in authors:
             model.addBookAuthor (catalog, author.strip(), book, compareauthors)
-    sort.mergesort (catalog['books'],compareratings)
-    
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución carga libros",t1_stop-t1_start," segundos")
+
 
 
 def loadTags(catalog):
     """
     Carga todos los tags del archivo y los agrega a la lista de tags
     """
+    t1_start = process_time() #tiempo inicial
     tagsfile = cf.data_dir + 'GoodReads/tags.csv'
     input_file = csv.DictReader(open(tagsfile))
     for tag in input_file:  
         model.addTag (catalog, tag)
+    t1_stop = process_time() #tiempo inicial
+    print("Tiempo de ejecución carga tags",t1_stop-t1_start," segundos")
+
     
 
 
@@ -113,11 +118,13 @@ def loadBooksTags (catalog):
     Primero se localiza el tag y se le agrega la información leida. 
     Adicionalmente se le agrega una referencia al libro procesado.
     """
-    booktagsfile = cf.data_dir + 'GoodReads/book_tags-small.csv'
+    t1_start = process_time() #tiempo inicial
+    booktagsfile = cf.data_dir + 'GoodReads/book_tags.csv'
     input_file = csv.DictReader(open(booktagsfile))
-    for tag in input_file: 
-        model.addBookTag (catalog, tag, compareids, comparegoodreadsid)
-
+    for booktag in input_file: 
+        model.addBookTag (catalog, booktag)
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución carga book tags",t1_stop-t1_start," segundos")
 
 def initCatalog ():
     """
@@ -134,7 +141,8 @@ def loadData (catalog):
     estructura de datos
     """
     loadBooks(catalog)
-    loadTags (catalog)
+    sort.sort(catalog['books'],compareratings)
+    loadTags(catalog)
     loadBooksTags(catalog)
 
 
@@ -154,9 +162,19 @@ def getBestBooks (catalog, number):
     return bestbooks
     
 
-def getBooksByTag (catalog, tag):
+def countBooksByTag (catalog, tag):
+    t1_start = process_time() #tiempo inicial
     tags = catalog['tags']
+    bookcount=0
     pos = lt.isPresent (tags, tag, comparetagnames)
-    if pos:
-        elem = lt.getElement (tags, pos)
-        return elem 
+    if pos>0:
+        tag_element = lt.getElement (tags, pos)
+        if tag_element != None:
+            iterator = it.newIterator(catalog['book_tags'])
+            while  it.hasNext(iterator):
+                book_tag = it.next(iterator)
+                if tag_element['tag_id']==book_tag['tag_id']:
+                    bookcount+=1
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución conteo libros por género",t1_stop-t1_start," segundos")
+    return bookcount 

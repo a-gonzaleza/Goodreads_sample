@@ -36,13 +36,15 @@ y otra para géneros
 def newCatalog():
     """
     Inicializa el catálogo de libros. Crea una lista vacia para guardar todos los libros,
-    Adicionalmente, crea una lista vacia para los autores y una lista vacia para los 
-    generos.   Retorna el catalogo inicializado.
+    Adicionalmente, crea una lista vacia para los autores, una lista vacia para los 
+    generos y una lista vacia para la asociación generos y libros. Retorna el catalogo inicializado.
     """
     catalog = {'books':None, 'authors':None, 'tags': None}
     catalog['books'] = lt.newList('ARRAY_LIST')
     catalog['authors'] = lt.newList('ARRAY_LIST')
     catalog['tags'] = lt.newList('ARRAY_LIST')
+    catalog['book_tags'] = lt.newList('ARRAY_LIST')
+
     return catalog
 
 
@@ -56,17 +58,22 @@ def newAuthor (name):
     return author
 
 
-def newTagBook (name, id):
+def newTag (name, id):
     """
-    Esta estructura crea una relación entre un tag y los libros que han sido 
-    marcados con dicho tag.  Se guarga el total de libros y una lista con 
-    dichos libros.
+    Esta estructura almancena los tags utilizados para marcar libros.
     """
-    tag = {'name':'', 'tag_id':'', 'total_books':0, 'books':None, 'count':0.0 }
+    tag = {'name':'', 'tag_id':''}
     tag ['name'] = name
     tag ['tag_id'] = id
-    tag ['books'] = lt.newList ()
     return tag
+
+def newBookTag (tag_id, book_id):
+    """
+    Esta estructura crea una relación entre un tag y los libros que han sido 
+    marcados con dicho tag.
+    """
+    booktag = {'tag_id':tag_id, 'book_id':book_id}
+    return booktag
 
 
 # Funciones para agregar informacion al catalogo
@@ -94,26 +101,18 @@ def addTag (catalog, tag):
     """
     Adiciona un tag a la lista de tags
     """
-    t = newTagBook (tag['tag_name'], tag['tag_id'])
+    t = newTag (tag['tag_name'], tag['tag_id'])
     lt.addLast (catalog['tags'], t)
 
 
 
-def addBookTag (catalog, tag, comparefunction, comparegoodreadsid):
+def addBookTag (catalog, booktag):
     """
-    Agrega una relación entre un libro y un tag asociado a dicho libro
+    Adiciona un tag a la lista de tags
     """
-    bookid = tag['goodreads_book_id']
-    tagid = tag['tag_id']
-    pos = lt.isPresent(catalog['tags'], tagid, comparefunction)
-    if pos:
-        tagbook = lt.getElement (catalog['tags'], pos)
-        tagbook ['total_books'] += 1
-        tagbook ['count'] += int (tag['count'])
-        posbook = lt.isPresent(catalog['books'], bookid, comparegoodreadsid)
-        if posbook:
-            book =  lt.getElement (catalog['books'], posbook) 
-            lt.addLast (tagbook['books'], book)
+    t = newBookTag (booktag['tag_id'], booktag['goodreads_book_id'])
+    lt.addLast (catalog['book_tags'], t)
+
 
 
 # Funciones de consulta

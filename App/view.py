@@ -97,6 +97,8 @@ while True:
         print ('Libros cargados: ' + str(lt.size(catalog['books'])))
         print ('Autores cargados: ' + str(lt.size(catalog['authors'])))
         print ('Géneros cargados: ' + str(lt.size(catalog['tags'])))
+        print ('Asociación de Géneros a Libros cargados: ' + str(lt.size(catalog['book_tags'])))
+
 
     elif int(inputs[0])==2:
         number = input ("Buscando los TOP ?: ")
@@ -111,13 +113,9 @@ while True:
 
     elif int(inputs[0])==4:
         label = input ("Etiqueta a buscar: ")
-        resp = controller.getBooksByTag (catalog, label)
-        print ('Se encontraron: ' + str(resp['total_books']) + ' Libros')
-        iterator = it.newIterator (resp['books'])
-        while it.hasNext (iterator):
-            book = it.next (iterator)
-            print (book['title'])
-
+        book_count = controller.countBooksByTag (catalog, label)
+        print ('Se encontraron: ',book_count, ' Libros')
+ 
     else:
         sys.exit(0)
 sys.exit(0)
